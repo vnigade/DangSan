@@ -1,0 +1,39 @@
+=cluster;Pointer Registrations;Duplicate Pointers;Objects Allocated;Objects free'd;Log Overflow
+=table
+min=1
+rotateby=-45
+#rotateby=30
+colors=black,grey7,grey3,grey5,grey1
+font=Times
+fontsz=7
+ylabel=Log Scale
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=10000000000
+logscaley=10
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2000
+#legendy=1000
+legendy=1400
+
+# Fill in the runtimes below
+# See http://www.burningcutlery.com/derek/bargraph/ for the format of this file and how to tweak it
+# Application Locking Enabled; Locking Disabled	
+bzip2		765968	387551	28	24	0
+gcc		609915202	498907559	1844516	1826931	8828753
+milc		2329920555	693600490	6515	6466	82320198
+gobmk		1837036147	24828981	133391	133380	5931088
+hmmer		2402990	531424	1393634	1393634	7767
+sjeng		271153182	0	5	1	0
+libquantum	130	64	149	149	0
+h264ref		783327	117826	38270	38268	44213
+lbm		6006	6000	4	4	0
+sphinx3		312774467	114752813	14224557	14023887	16242308
+perlbench	21572911334	20049851523	53672668	51968702	113978313
+namd		60823	28393	1324	1322	0
+dealII		78545358	31804467	151258310	151258316	305827
+omnetpp		16653803247	1799763076	267168424	267102188	226081997
+astar		675195268	43980401	3683333	3683333	18641362
+xalancbmk	2917543203	1067660925	135155549	135155556	32601425

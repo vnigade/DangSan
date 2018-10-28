@@ -1,0 +1,8 @@
+Benchmark, Metaallo-Dangling, Baseline, Times Degradation
+400.perlbench, 2034.26, 294.59
+400.perlbench, 1547.35, 293.73
+400.perlbench, 1576.67, 294.48
+400.perlbench, 1515.18, 292.74
+TOTAL:400.perlbench, 6673.46, 1175.54, 5.676
+
+

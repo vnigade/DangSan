@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+source ~/Metalloc/autosetup-benchmarks.inc
+
+: ${CONFIG:="metaalloc-var-8b baseline baselinesafestack"}
+: ${PRUNITER:=4}
+: ${ITER:=1}
+
+cd ~/Metalloc/autosetup.dir/llvm-apps/out-prun-spec/
+echo "Benchmark," "Metaallo-Dangling," "Baseline," "safestack," "Dsan Degradation," "Safestack Degradation"
+for bench in $BENCHMARKS; do
+    metaoutput=(`grep -i "$bench" "metaalloc-var-8b-iter${ITER}/1-times.txt" | awk -F '=' '{print $2}'`)
+    baseoutput=(`grep -i "$bench" "baseline-iter${ITER}/1-times.txt" | awk -F '=' '{print $2}'`) 
+    safeoutput=(`grep -i "$bench" "baselinesafestack-iter${ITER}/1-times.txt" | awk -F '=' '{print $2}'`)
+    metaTotal=0
+    baseTotal=0
+    safeTotal=0
+    for i in `seq 1 "$PRUNITER"`; do
+        echo "$bench, ${metaoutput[i-1]}, ${baseoutput[i-1]}";
+        metaTotal=(`echo "scale=5;$metaTotal  + ${metaoutput[i-1]}" | bc -l`)
+        baseTotal=(`echo "scale=5;$baseTotal  + ${baseoutput[i-1]}" | bc -l`)
+        safeTotal=(`echo "scale=5;$safeTotal  + ${safeoutput[i-1]}" | bc -l`)
+    done
+    metapercent=(`echo "scale=3;$metaTotal / $baseTotal" | bc -l`)
+    safepercent=(`echo "scale=3;$safeTotal / $baseTotal" | bc -l`)
+    echo "TOTAL:$bench, $metaTotal, $baseTotal, $safeTotal, $metapercent, $safeTotal"
+    echo -e "\n"
+done

@@ -1,0 +1,25 @@
+=cluster;TRANSE;TRANSE-SG;HOLE;HOLE-SG
+=table
+=nolegoutline
+=nogridy
+min=0
+rotateby=0
+#rotateby=30
+colors=grey7,grey2,grey5,black
+font=Times
+fontsz=7
+ylabel=Mean Reciprocal Rank (MRR)
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=0.5
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=3300
+#legendy=1000
+legendy=1400
+
+#Data below
+FB15k	0.39	0.40	0.40    0.42
+LUBM1	0.18	0.23  	0.13    0.19  
+YAGO2	0.13	0.16	0.14    0.15

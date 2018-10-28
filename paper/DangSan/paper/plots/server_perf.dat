@@ -1,0 +1,25 @@
+=cluster;Baseline;Baseline-SafeStack;DangSan
+=table
+min=0
+rotateby=0
+#rotateby=30
+colors=dark_green,dark_blue,red
+font=Times
+fontsz=7
+ylabel=Requests per Sec (#)
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=50000
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2000
+#legendy=1000
+legendy=1400
+
+# Fill in the runtimes below
+# See http://www.burningcutlery.com/derek/bargraph/ for the format of this file and how to tweak it
+# Application Locking Enabled; Locking Disabled	
+Nginx		10751.14727	10945.96727	8952.27454
+httpd		47838.95818	47633.9909	39186.17363
+lighttpd	11224.42181	9489.93818	8872.82454

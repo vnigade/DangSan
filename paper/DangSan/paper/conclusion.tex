@@ -1,0 +1,4 @@
+\section{Conclusion} \label{conclusion}
+In this paper, we presented \projectname{}, a fast and efficient lock-less system to detect Use-after-Free exploits in multi-threaded applications. Thread-safety in multi-threaded program incurs prohibitively high run-time overhead. Our design (inspired from Log-structured file system) maintains per-Thread per-Object metadata that eliminates contention between threads. \projectname{} has moderate run-time overhead on CPU intensive benchmarks when all pointers (Heap, Stack and Global) are tracked. It has low throughput degradation for widely used WebServers. Our complete and efficient \projectname{} system can be used for large production applications.
+
+%\projectname{} efficiently detects Use-after-Free exploit in Mul      

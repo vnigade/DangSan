@@ -1,0 +1,124 @@
+System setup:
+    Allow kernel to overcommit: Change 0 to 1 in "/proc/sys/vm/overcommit_memory".
+
+Building and using LLVM 3.8:
+    Download revision 251286 from SVN. (together with clang and compiler-rt)
+    Apply the LLVM and COMPILERRT patches from the patches folder.
+    Select a path prefix to be used to install LLVM into ("path_to_install").
+    Install binutils with GOLD linker support.
+        - Ubuntu binutils-gold package or build it yourself.
+        - Have the binaries in PATH when using LLVM!
+    Get a source folder of binutils (recent version should work).
+    Create build folder for LLVM.
+    Execute the following command from build folder to configure it.
+        cmake -DCMAKE_INSTALL_PREFIX="path_to_install" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DLLVM_BINUTILS_INCDIR="binutils_source/include/" "path_to_llvm_source"
+    Run make to build LLVM (advised to use multiple processes).
+    Add "path_to_install"/bin to PATH and "path_to_install"/lib to LD_LIBRARY_PATH when using LLVM.
+
+Building components:
+    Make sure to have LLVM set up to be used.
+    Run make in metapagetable, staticlibs and llvm-plugins.
+    Optionally configure metapagetable using "make config" as defined below.
+    Always run "make" again for metapagtable after reconfiguring it.
+
+Building custom allocator:
+    Custom allocator found in folder gperftools-metalloc.
+    Included gperftools-metalloc is modified version of gperftools supporting the metadata management.
+        - Branched from GIT commit c46eb1f3d2f7a2bdc54a52ff7cf5e7392f5aa668.
+    Use baseline gperftools to measure overhead against (large differences between tcmalloc and ptalloc).
+        - Just download from GIT, potentially the same commit used for gperftools-metalloc.
+    Building gperftools: just "./configure; make" (libraries found in gperftools/.lib/, specifically libtcmalloc.so).
+    gperftools-metalloc requires metapagetable to be already built.
+    Always run "make" again for gperftools-metalloc after reconfiguring metapagetable.
+
+Testing the system:
+    Make sure to have LLVM set up to be used.
+    Run "make" in demo folder.
+    Run "./demo", expected output is 97 and no crash.
+
+Using system against target program:
+    Make sure to have LLVM set up to be used.
+    Compile target program using clang/clang++.
+        - Use the following CFLAGS: -flto -O3 -fsanitize=safe-stack.
+            - Link-time optimizations (for LLVM bytecode) and SafeStack.
+        - Use the following LDFLAGS: -flto -O3 -fsanitize=safe-stack.
+            - Link-time optimizations (for LLVM bytecode) and SafeStack.
+        - Additional LDFLAGS for metadata tracking:
+            -Wl,-plugin-opt=-load="path_to_repo"/llvm-plugins/libplugins.so - load the custom plugins.
+            -Wl,-plugin-opt=-byvalhandler -Wl,-plugin-opt=-stacktracker -Wl,-plugin-opt=-globaltracker -Wl,-plugin-opt=-custominline
+                - Plugins to track the stack, globals and inline the helpers.
+            @"path_to_repo"/metapagetable/linker-options
+                - Configures the passes with the same setup as defined in metapagetable
+            -umetaset_1 -umetaget_1 -uinitialize_global_metadata -L"path_to_repo"/staticlib -Wl,-whole-archive -l:libmetadata.a -Wl,-no-whole-archive
+                - Link the static library which contains the helpers
+            -L"path_to_repo"/gperftools-metalloc/.libs -ltcmalloc
+                - Link the custom tcmalloc implementation to replace the system allocator
+            Optionally: -Wl,-plugin-opt=-writetracker
+                - Demo plugin to track writes to memory.
+
+Options:
+    Core configuration: Configure using "make config" in metapagetable folder (METALLOC_OPTIONS="-D(option)=(value) -D(option2)=(value2) ..." make config)
+        FIXEDCOMPRESSION (bool) - use the fixed compression shadowing presented in previous systems (default false)
+        METADATABYTES (uint64) - size of metadata in bytes (default 8)
+        DEEPMETADATA (bool) - allocate metadata nodes and include only the pointers in the metadata area (default false)
+        DEEPMETADATABYTES (uint64) - size of allocated metadata in bytes (default 8)
+    Optional configuration: Add flags to linking stage when building target program (-Wl,-plugin-opt=-(option)=(value))
+        largestack (bool) - move large unsafe static allocas to a secondary unsafe stack with larger alignment (default false)
+            -Also set the environment option "SAFESTACK_OPTIONS=largestack=true" when running the binary
+        largestackthreshold (unsigned long) - the threshold for large unsafe static allocas (default 2^12)
+        mergedstack (bool) - merge unsafe static allocas in every function into single one for metadata purposes (default false)
+    Metadata baseline constants (do not change unless discussed): Configure the defines in staticlib/metadata.h
+        #define STACKALIGN (unsigned long) (default ((unsigned long)6))
+            - the alignment bits used for regular unsafe stack objects
+        #define STACKALIGN_LARGE (unsigned long) (default ((unsigned long)12))
+            - the alignment bits used for large unsafe stack objects (when requested)
+        #define GLOBALALIGN (unsigned long) (default ((unsigned long)3))
+            - DO NOT CHANGE
+
+Adding helper functions to the static library:
+    Any *.c file added to "staticlib" will be automatically compiled into libmetadata.a.
+    Do not include any CPP code or dependency, as the library is also meant for pure C binaries.
+    Any new functions should be added to METADATAFUNCS in staticlib/metadata.h to avoid being instrumented.
+    All functions added to METADATAFUNCS will be automatically inlined by the CustomInliner pass.
+
+Adding new LLVM passes:
+    Any *.cpp file added to "llvm-plugins" will be automatically compiled into libplugins.so and libplugins-opt.so.
+    libplugins.so is used with the GOLD linker, libplugins-opt.so is used with the OPT tool.
+    Use ByvalHandler as an example of a simple plugin and StackTracker as one using helper functions.
+    Use WriteTracker as an example of how to filter out uninteresting memory writes.
+    Try to use only FunctionPasses from the ByvalHandler pattern to get access to analysis passes in LLVM.
+
+Running and configuring SPEC2006:
+    Make sure to have LLVM set up to be used.
+    Make sure that LD_LIBRARY_PATH includes the folder where libtcmalloc.so resides (either regular or custom variant depending on requirements).
+    Make sure that METALLOC_PATH environment variable is set to "path_to_repo".
+    Make sure that large stacks are enabled for SafeStack for non-baseline runs (set SAFESTACK_OPTIONS=largestack=true).
+
+    Examples of SPEC2006 configurations:
+
+        Baseline:
+CC                 = clang
+CXX                = clang++
+EXTRA_CFLAGS       = -fsanitize=safe-stack
+EXTRA_CXXFLAGS     = -fsanitize=safe-stack
+EXTRA_LDFLAGS      = -fsanitize=safe-stack -Wl,-plugin-opt=-load=$(METALLOC_PATH)/llvm-plugins/libplugins.so -Wl,-plugin-opt=-byvalhandler -L$(METALLOC_PATH)/gperftools/.libs -ltcmalloc
+COPTIMIZE   = -flto -O3 -fno-strict-aliasing -std=gnu89
+CXXOPTIMIZE = -flto -O3 -fno-strict-aliasing
+
+        Enable metadata tracking:
+CC                 = clang
+CXX                = clang++
+EXTRA_CFLAGS       = -fsanitize=safe-stack
+EXTRA_CXXFLAGS     = -fsanitize=safe-stack
+EXTRA_LDFLAGS      = -fsanitize=safe-stack -Wl,-plugin-opt=-largestack=true -Wl,-plugin-opt=-load=$(METALLOC_PATH)/llvm-plugins/libplugins.so -Wl,-plugin-opt=-mergedstack=false -Wl,-plugin-opt=-byvalhandler -Wl,-plugin-opt=-stacktracker -Wl,-plugin-opt=-globaltracker -Wl,-plugin-opt=-custominline -umetaset_1 -umetaget_1 -uinitialize_global_metadata -L$(METALLOC_PATH)/staticlib -Wl,-whole-archive -l:libmetadata.a -Wl,-no-whole-archive -L$(METALLOC_PATH)/gperftools-metalloc/.libs -ltcmalloc @$(METALLOC_PATH)/metapagetable/linker-options
+COPTIMIZE   = -flto -O3 -fno-strict-aliasing -std=gnu89
+CXXOPTIMIZE = -flto -O3 -fno-strict-aliasing
+
+        Enable metadata tracking and reading:
+CC                 = clang
+CXX                = clang++
+EXTRA_CFLAGS       = -fsanitize=safe-stack
+EXTRA_CXXFLAGS     = -fsanitize=safe-stack
+EXTRA_LDFLAGS      = -fsanitize=safe-stack -Wl,-plugin-opt=-largestack=true -Wl,-plugin-opt=-load=$(METALLOC_PATH)/llvm-plugins/libplugins.so -Wl,-plugin-opt=-mergedstack=false -Wl,-plugin-opt=-byvalhandler -Wl,-plugin-opt=-stacktracker -Wl,-plugin-opt=-globaltracker -Wl,-plugin-opt=-writetracker -Wl,-plugin-opt=-custominline -umetaset_1 -umetaget_1 -uinitialize_global_metadata -L$(METALLOC_PATH)/staticlib -Wl,-whole-archive -l:libmetadata.a -Wl,-no-whole-archive -L$(METALLOC_PATH)/gperftools-metalloc/.libs -ltcmalloc @$(METALLOC_PATH)/metapagetable/linker-options -Wl,-plugin-opt=-METALLOC_ONLYPOINTERWRITES=false
+COPTIMIZE   = -flto -O3 -fno-strict-aliasing -std=gnu89
+CXXOPTIMIZE = -flto -O3 -fno-strict-aliasing

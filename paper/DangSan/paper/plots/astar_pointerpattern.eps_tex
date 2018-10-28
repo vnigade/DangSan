@@ -1,0 +1,76 @@
+%% Creator: Inkscape inkscape 0.48.4, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'astar_pointerpattern.eps' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{280bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.74857143)%
+    \put(0,0){\includegraphics[width=\unitlength]{astar_pointerpattern.eps}}%
+    \put(0.17114286,0.11257143){\makebox(0,0)[rb]{\smash{0}}}%
+    \put(0.17114286,0.24028571){\makebox(0,0)[rb]{\smash{5000}}}%
+    \put(0.17114286,0.36828571){\makebox(0,0)[rb]{\smash{10000}}}%
+    \put(0.17114286,0.496){\makebox(0,0)[rb]{\smash{15000}}}%
+    \put(0.17114286,0.62371429){\makebox(0,0)[rb]{\smash{20000}}}%
+    \put(0.18885714,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.264,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.33971429,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.41571429,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.49142857,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.56742857,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.64314286,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.71914286,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.79485714,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.87085714,0.07428571){\makebox(0,0)[b]{\smash{16}}}%
+    \put(0.94657143,0.07428571){\makebox(0,0)[b]{\smash{8192}}}%
+    \put(0.03771429,0.37771429){\rotatebox{90}{\makebox(0,0)[b]{\smash{Number of Pointers}}}}%
+    \put(0.56771429,0.01685714){\makebox(0,0)[b]{\smash{1000 Objects with object size label}}}%
+    \put(0.56771429,0.68114286){\makebox(0,0)[b]{\smash{astar benchmark}}}%
+    \put(0.80742857,0.58542857){\makebox(0,0)[rb]{\smash{Valid}}}%
+    \put(0.80742857,0.54714286){\makebox(0,0)[rb]{\smash{Duplicate}}}%
+    \put(0.80742857,0.50885714){\makebox(0,0)[rb]{\smash{Unique}}}%
+  \end{picture}%
+\endgroup%

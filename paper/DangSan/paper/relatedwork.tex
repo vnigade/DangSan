@@ -1,0 +1,29 @@
+\section{Related Work} \label{relatedwork}
+Much work has been done to prevent and detect use of dangling pointers. Mitigation scheme include techniques like static analysis and dynamic analysis. Other schemes propose customized memory allocators, memory error detection tools, safe languages etc. \\
+
+% 1) What is this?
+% 2) What are the solutions?
+% 3) Explain drawbacks of each?
+
+\textbf{Static Analysis}:
+Static analysis performs source code or binary analysis to find memory errors statically.~\cite{feist2014statically}, SLAyer~\cite{berdine2011slayer},  needs inter-procedural pointer or data flow analysis. Static analysis does not cover all possible dangling pointer dereferences because object allocations, deallocations, pointer propagations and dangling pointer dereference can be in different modules, functions and threads. These techniques are not scalable for large applications. In many viable solutions, static analysis is combined with dynamic run-time check to detect Use-after-Free exploits efficiently .\\
+
+\textbf{Dynamic Analysis}.
+Dynamic analysis tracks run-time pointer-object relationship. Recent schemes like \dangnull{}~\cite{lee2015dangnull}, \freesentry{}~\cite{younan2015freesentry}, UnDangle~\cite{caballero2012undangle}, CETS~\cite{nagarakatte2010cets}, Address Sanitizer~\cite{serebryany2012addresssanitizer} use run-time information to prevent Use-after-Free exploits. \dangnull{} uses variant of red-black binary tree to efficiently store and retrieve memory object metadata. \dangnull{} has huge average run-time overhead of $80\%$. Moreover, it does not track all pointers (Stack, Global and Heap). \freesentry{} has low average run-time overhead of $25\%$. However, it has no support for multi-threaded applications. That is, it is unclear how much performance overhead \freesentry{} incurs in production servers. UnDangle uses execution trace, taint tracking technique to identify memory locations associated for the same taint. It is useful in software testing. It needs full test coverage to identify all dangling pointers. It does not prevent dangling pointers use during program execution. Address Sanitizer detects memory errors during run-time. It extends compiler infrastructure LLVM to provide memory protection option. It covers most of the memory corruption bugs. However, it has on an average run-time overhead of $73\%$.~\cite{dhurjati2006efficiently} proposed improvements over Electric Fence~\cite{dhurjati2006efficiently}. It uses page protection mechanism to detect dangling pointer deference. It allocates new virtual page for every memory object. It has solved the virtual address space exhaustion problem by mapping multiple virtual pages to same physical page. However, this technique is inefficient for the applications that have large number of object allocations and deallocations.\\
+
+\textbf{Memory Allocators}.
+Memory allocators designed to mitigate Use-after-Free vulnerabilities provide transparent solution. Cling~\cite{akritidis2010cling} memory allocator is based on type-safe address reuse technique. Moreover, it does not use free memory for the metadata. Cling prevents type unsafe address reuse but it does not prevent unsafe dangling dereference for the same type object. DieHarder~\cite{novark2010dieharder} memory allocator is a probabilistic approach to find memory errors. It randomize the location of heap objects that makes exploit hard to execute. DieHarder has low overhead but it is probabilistic (i.e. may not cover all dangling pointer dereferences). \\
+
+\textbf{Memory error detectors}.
+Valgrind~\cite{nethercote2007valgrind} and Purify~\cite{hastings1991purify} are widely used memory error debugging tools.  Both the tools are used in software testing and debugging. Therefore, its effectiveness depends on the total test coverage. Moreover, Valgrind and Purify incurs huge performance overhead in the order of $10x$. GCCs Mudflap~\cite{eigler2003mudflap} performs dynamic memory access check by maintaining identifier for every allocated object. Checking every memory access incurs huge performance overhead. \\
+
+\textbf{Safe Languages}:
+Cyclone~\cite{jim2002cyclone} is a safe dialect of C programming language. It prevents widely present spatial and temporal vulnerabilities of C language. It performs flow analysis and run-time checks. C applications require significant changes to port the application to Cyclone (as it has somewhat different syntax and semantics to simplify static analysis). It uses conservative garbage collection strategy which makes it slower than regular C language. CCured~\cite{necula2005ccured} adds memory safety to the C language by introducing run-time checks. It needs metadata for run-time checks. Porting of C application becomes difficult due to metadata requirement. Similar to Cyclone, CCured uses garbage collection that introduces significant run-time and memory overhead.  
+
+% 1) Prevention techniques using only static analysis
+% 2) Prevention techniques using run-time or dynamic analysis
+% 3) Customized memory allocators.
+% 4) Widely used memory error detector tools, like valgrind.
+% 5) Memory safe languages
+
+

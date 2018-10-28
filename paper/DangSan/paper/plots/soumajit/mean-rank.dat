@@ -1,0 +1,25 @@
+=cluster;TRANSE;TRANSE-SG;HOLE;HOLE-SG
+=table
+=nolegoutline
+=nogridy
+min=0
+rotateby=0
+#rotateby=30
+colors=grey7,grey2,grey5,black
+font=Times
+fontsz=7
+ylabel=Mean Rank
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=50000
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2000
+#legendy=1000
+legendy=1400
+
+#Data below
+FB15k		68.14	65.46  289.98  246.48
+LUBM1		526.22  459.30  1922.67 1210.75  
+YAGO2		10638.99    9951.42  45539.70    42778.83

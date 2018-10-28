@@ -1,0 +1,21 @@
+# clustered and stacked graph example w/ bogus data
+=stackcluster;Good;Bad
+=sortbmarks
+=nogridy
+=noupperright
+rotateby=0
+legendx=right
+legendy=center
+colors=grey3,black
+yformat=%g%%
+#xlabel=Benchmark
+ylabel=Percentage of Improvement(Good) and Loss(Bad)
+=table
+multimulti=TRANSE-SG
+LUBM1            31.38	11.76 
+FB15k            23.34	11.71 
+YAGO             8.53	2.49 
+multimulti=HOLE-SG
+LUBM1            31.71	6.45
+FB15k            29.88	12.49
+YAGO             9.03	2.39

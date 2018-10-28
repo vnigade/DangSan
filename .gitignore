@@ -1,0 +1,6 @@
+*~
+gperftools/*
+/autosetup-log.txt
+/autosetup.dir/
+**/cscope.files
+**/cscope.out

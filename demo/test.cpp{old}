@@ -1,0 +1,192 @@
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+
+__attribute__((constructor)) void test_contructor() {
+    return;
+}
+
+void __attribute__ ((noinline)) my_strcpy(char *dst, char *src)
+{
+  while(*src != 0)
+  {
+    *dst++ = *src++;
+  }
+}
+
+void __attribute__ ((noinline)) setDst(char dst1, char dst2, char dst3, char dst4, char dst5, char dst6, char dst7, char dst8, char dst9, char dst10)
+{
+  if (dst9 == 3)
+      dst10 = 12;
+  printf("%d\n", dst10);
+}
+
+struct aa
+{
+  int x; int y;
+  char *d;
+  int t1;
+  int t2;
+  int t3;
+  int t4;
+  int t5;
+  int t6;
+
+};
+
+void __attribute__ ((noinline)) setStruct(aa s1, aa& s2, aa* s3, char* ptr)
+{
+  s1.x = 1;
+  s2.x = 2;
+  s2.y = 22;
+  s3->x = 3;
+  *ptr = 4;
+  *(ptr + 5) = 5;
+  my_strcpy((char*)&s2, (char*)&s1);
+  aa *tmp = s3;
+  if (s3->y == 3) 
+    tmp = &s2;
+  tmp->y = 4;
+}
+
+void __attribute__ ((noinline)) useStruct()
+{
+  aa test;
+  test.x = 1;
+  setStruct(test, test, &test, test.d);
+}
+
+
+void SetMetadata(void * ptr, size_t size)
+{
+  return;
+  /*size_t *endptr = (size_t*)(((unsigned long)ptr & ARENAMASK) + ARENASIZE);
+  size_t alignment = *(endptr - 1);
+  size_t *metaptr = (size_t*)(((unsigned long)ptr & ARENAMASK) + METADATAOFFSET);
+  size_t *base = metaptr + (((unsigned long)ptr & !ARENAMASK) >> alignment);
+  size_t *end = base + (size >> alignment) + 1;
+  while (base != end)
+  {
+    *base = 0x1234;
+    ++base;
+  }*/
+}
+
+class A
+{
+  int a;
+  int b;
+  int c;
+public:
+  A() : a(1), b(2), c(3)
+  {
+    SetMetadata((void*)this, sizeof(A));
+  }
+};
+
+class B
+{
+  int a;
+public:
+  B() : a(3)
+  {
+    SetMetadata((void*)this, sizeof(B));
+  }
+};
+
+class C
+{
+public:
+  int a[10];
+  C()
+  {
+    for (int i = 0; i < 10; ++i)
+      a[i] = i;
+    SetMetadata((void*)this, sizeof(C));
+  }
+};
+
+class D
+{
+public:
+  int a[1024];
+  D()
+  {
+    for (int i = 0; i < 1024; ++i)
+      a[i] = i;
+    a[1023] = 0;
+    my_strcpy((char*)a, (char*)(a+10));
+    SetMetadata((void*)this, sizeof(D));
+  }
+};
+
+int fibonacci(int n)
+{
+  if (n == 0)
+    return 0;
+  else if (n == 1)
+    return 1;
+  else
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+char str_empty[1024];
+char str[] = "asfhsodfhnsodgnoasfgosgog";
+char str2[] = "a";
+
+int main(int argc, char **argv)
+{
+  int selectedOption = -1;
+  if (argc > 1)
+    selectedOption = atoi(argv[1]);
+  char array[128];
+  char val;
+  my_strcpy(str_empty, str);
+  my_strcpy(array, str);
+  my_strcpy(&val, str2);
+  val = val * 2 - 97;
+  setDst(val, val, val, val, val, val, val, val, val, val);
+  D sD;
+  my_strcpy((char*)sD.a, str);
+  for (int i = 0; i < 10000000; ++i)
+  {
+    A* pA;
+    B* pB;
+    C* pC;
+    D* pD;
+    int option = selectedOption;
+    if (option == -1)
+      option = rand() % 4;
+    switch(option)
+    {
+      case 0:
+        pA = new A();
+        if (fibonacci(4) > 1000000000)
+            printf("%p\n", pA);
+        delete pA;
+        break;
+      case 1:
+        pB = new B();
+        if (fibonacci(4) > 1000000000)
+            printf("%p\n", pB);
+        delete pB;
+        break;
+      case 2:
+        pC = new C();
+        if (fibonacci(4) > 1000000000)
+            printf("%p\n", pC);
+        delete pC;
+        break;
+      case 3:
+        pD = new D();
+        if (fibonacci(4) > 1000000000)
+            printf("%p\n", pD);
+        delete pD;
+        break;
+      default:
+        break;
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,143 @@
+	%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
+%               sigplanconf-guide.pdf
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
+
+
+\documentclass[preprint,10pt,numbers]{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% numbers       To obtain numeric citation style instead of author/year.
+
+\usepackage{amsmath}
+
+% non-template packages
+\usepackage[bookmarks=true,pagebackref=false,pdftex]{hyperref}
+\usepackage{epsfig} % eps figures
+\usepackage{graphicx}
+\usepackage[outdir=./]{epstopdf}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% Packages required for the tables
+\usepackage{csvsimple}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hhline}
+
+\newcommand{\cL}{{\cal L}}
+
+
+\begin{document}
+
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country}
+\copyrightyear{20yy}
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
+\copyrightdoi{nnnnnnn.nnnnnnn}
+
+\newcommand{\projectname}[0]{DangSan}
+\newcommand{\freesentry}[0]{FreeSentry}
+\newcommand{\dangnull}[0]{DangNull}
+\newcommand{\metalloc}[0]{METAlloc} % Used this name from the published paper.
+
+% Command to insert new line for table header
+\newcommand{\tablecell}[1]{\bfseries \begin{tabular}{@{}l@{}} #1 \end{tabular}}
+
+\lstset
+{ %Formatting for code in appendix
+    language=C,
+    basicstyle=\footnotesize,
+    numbers=left,
+    stepnumber=1,
+    showstringspaces=false,
+    tabsize=2,
+    breaklines=true,
+    breakatwhitespace=false,
+    %xleftmargin=.1\textwidth, 
+    xrightmargin=.1\textwidth
+}
+
+% Uncomment the publication rights you want to use.
+%\publicationrights{transferred}
+%\publicationrights{licensed}     % this is the default
+%\publicationrights{author-pays}
+
+%\titlebanner{banner above paper title}        % These are ignored unless
+\preprintfooter{Master Thesis Report}   % 'preprint' option specified.
+
+%\title{DangSan: A mitigation technique to prevent dangling pointers exploit}
+%\subtitle{Subtitle Text, if any}
+%\title{DangSan: Practical Use-After-Free Detection}
+\title{Efficiently Detecting Use-after-Free Exploits in Multi-Threaded Applications}
+\authorinfo{Vinod Vijay Nigade}
+           {Vrije Universiteit Amsterdam}
+           {vinod.nigade@gmail.com}
+%\authorinfo{Author 1}
+%			{University}
+%			{author@email.com}	
+%\authorinfo{}
+%           {}
+%           {}
+
+\maketitle
+
+
+%\category{CR-number}{subcategory}{third-level}
+% general terms are not compulsory anymore,
+% you may leave them out
+%\terms
+%term1, term2
+%\keywords
+%use-after-free, SPEC2006
+\input{abstract}
+\input{introduction}
+\input{background1}
+\input{overview}
+
+
+%\input{background}
+
+\input{dangsan}
+
+\input{implementation}
+\input{evaluation}
+%\subsection{Performance Analysis}
+%\subsection{Correctness}
+
+\input{limitations}
+
+\input{relatedwork}
+
+\input{conclusion}
+
+\input{ack.tex}
+
+\bibliographystyle{abbrvnat}
+\bibliography{refs}
+
+\end{document}

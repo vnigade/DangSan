@@ -1,0 +1,15 @@
+\section{Overview} \label{Overview}
+
+Large number of object allocations, deallocations and pointer propagations pose challenges in developing fast Use-after-Free detection system. Large scale applications like Web-Servers, Browsers are multi-threaded applications. Using dynamic analysis efficiently in multi-threaded application requires less thread synchronization. Recently proposed Use-after-Free detection systems introduce huge performance overhead or they have ignored thread-safety completely. \\
+
+In this paper, we present and evaluate \projectname{}, a simple and efficient system to prevent Use-after-Free exploits during run-time. LLVM compiler instrumentation pass is used to insert run-time tracking function calls. We present optimal run-time data structure design for multi-threaded application. It removes a need for thread synchronization. We show that this lock-less design can be used practically in production servers that needs low overhead. \\
+ 
+This paper has following contribution,
+\begin{itemize}
+\item We show that thread-safe Use-after-Free schemes in multi-threaded application can lead to huge run-time overhead. We implemented \freesentry{} scheme using \metalloc{}. We evaluated this design with and with-out thread-safety.
+\item We propose \projectname{}, a novel, simple and efficient lock-less system to efficiently store and retrieve pointer-object relationship in Multi-threaded applications.
+\item We implemented and evaluated \projectname{} for SPEC2006 CPU benchmarks and widely used Web Servers (\texttt{httpd}, \texttt{nginx} and, \texttt{lighttpd}).
+\item We verified \projectname{} correctness on recently discovered Use-after-Free (and Double-Free) vulnerabilities.
+\end{itemize}
+
+Section~\ref{\projectname{}}\ discusses \projectname{} design. It discusses design assumptions, criteria and parameters. Performance and correctness evaluation is presented in Section ~\ref{evaluation}. Related work is discussed in Section ~\ref{relatedwork}. Finally, Section ~\ref{conclusion} concludes our contribution. 

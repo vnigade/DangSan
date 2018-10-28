@@ -1,0 +1,40 @@
+=cluster;Locking Enabled  ;Locking Disabled  
+=table
+min=1
+rotateby=-45
+#rotateby=30
+#colors=grey4,grey3,grey2
+colors=dark_blue,red
+font=Times
+fontsz=7
+ylabel=Normalized run time
+yformat=%g
+xscale=0.6
+yscale=0.67
+max=5
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2000
+#legendy=1000
+legendy=1400
+
+# Fill in the runtimes below
+# See http://www.burningcutlery.com/derek/bargraph/ for the format of this file and how to tweak it
+# Application Locking Enabled; Locking Disabled	
+bzip2		1.005199128	1.009391605
+gcc		2.860406607	1.391745972
+milc		1.546996107	1.100375578
+gobmk		1.521941441	1.474179067
+hmmer		1.195692938	1.002566752
+sjeng		1.008540677	1.209247277
+libquantum	1.011902217	0.8119792196
+h264ref		1.011902217	1.006200556
+lbm		1.089694586	0.8893937339
+sphinx3		1.046004937	0.9966343287
+perlbench	12.39526936	4.324444744
+namd		0.9990719046	0.9986306789
+dealII		1.178167537	1.164586503
+omnetpp		7.437125227	3.826917869
+astar		1.703818692	1.383800862
+xalancbmk	2.663282018	1.846727423
+GEOMEAN		1.696119008	1.332184722

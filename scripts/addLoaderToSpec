@@ -1,0 +1,26 @@
+#!/usr/bin/python
+
+import sys
+
+if len(sys.argv) < 2:
+    print "Missing argument for SPEC folder"
+
+specdir = str(sys.argv[1])
+print specdir
+
+fin = open(specdir + "/speccmds.cmd", 'r')
+fout = open(specdir + "/speccmds.cmd-new", 'w')
+
+for line in fin:
+    tokenized = line.split(" ");
+    if tokenized[0] == "-o":
+        fout.write(tokenized[0] + " ")
+        fout.write(tokenized[1] + " ")
+        fout.write(tokenized[2] + " ")
+        fout.write(tokenized[3] + " ")
+        fout.write("customLoader ")
+        for i in range(4, len(tokenized) - 1):
+            fout.write(tokenized[i] + " ")
+        fout.write(tokenized[len(tokenized) - 1])
+    else:
+        fout.write(line);

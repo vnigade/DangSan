@@ -1,0 +1,104 @@
+/*
+ * memlick.c
+ * 	Memory lick detector for C programs.
+ * 	Author - Vinod
+ */
+#include <stdio.h>
+#include <pthread.h>
+#include "metadata.h"
+#include "metapagetable.h"
+
+static pthread_spinlock_t memlick_lock;
+/*
+ * Structure to hold object information.
+ */
+typedef struct memlick_objinfo	memlick_objinfo_t;
+struct memlick_objinfo {
+	unsigned long 		addr;
+	unsigned long 		size;
+	memlick_objinfo_t 	*prev;
+	memlick_objinfo_t 	*next;
+};
+
+memlick_objinfo_t *root_ptr = NULL;
+
+extern void memlick_track_obj(unsigned long obj_addr, unsigned long size);
+extern void memlick_free_obj(unsigned long obj_addr);
+
+__attribute__((visibility ("hidden")))
+void
+memlick_initialize(void)
+{
+
+	/* Set malloc post hook - after deep metadata allocation */
+	metalloc_malloc_posthook = memlick_track_obj;
+	
+	/* Set free post hook */
+	metalloc_free_prehook = memlick_free_obj;
+	
+	pthread_spin_init(&memlick_lock, PTHREAD_PROCESS_PRIVATE);	
+	return;
+}
+
+void
+memlick_fini(void)
+{
+	memlick_objinfo_t 	*headnode = root_ptr;
+	if (root_ptr != NULL) {
+		printf("Memory lick detected : \n");
+		while (headnode) {
+			printf("Memory address %lu size %lu \n", (unsigned long)headnode->addr, (unsigned long)headnode->size);
+			headnode = headnode->next;
+		}
+	}
+	return;
+}
+
+/*__attribute__((section(".preinit_array"), used))
+void (*init_memlick)(void) = memlick_initialize;
+
+__attribute__((section(".fini_array"), used))
+void (*destroy_memlick)(void) = memlick_fini;
+*/
+void
+memlick_track_obj(unsigned long obj_addr, unsigned long size)
+{
+	meta8   		metadata = metaget_8(obj_addr);
+	memlick_objinfo_t 	*headnode = (memlick_objinfo_t *)metadata;
+	headnode->addr = obj_addr;
+	headnode->size = size;
+	headnode->next = headnode->prev = NULL;	
+
+	/* Insert at the front of the list */
+	pthread_spin_lock(&memlick_lock);
+	if (root_ptr != NULL) {
+		headnode->next = root_ptr;
+		root_ptr->prev = headnode;
+	}
+	root_ptr = headnode;
+	pthread_spin_unlock(&memlick_lock);
+
+	return;	
+}
+
+void
+memlick_free_obj(unsigned long obj_addr)
+{
+	meta8 			metadata = metaget_8(obj_addr);
+	memlick_objinfo_t       *headnode = (memlick_objinfo_t *)metadata;
+	
+	pthread_spin_lock(&memlick_lock);
+	if (root_ptr == headnode) {
+		root_ptr = root_ptr->next;
+		if (root_ptr) {
+			root_ptr->prev = NULL;
+		}
+	} else {
+		headnode->prev->next = headnode->next;
+		if (headnode->next)
+			headnode->next->prev = headnode->prev;
+	}
+	pthread_spin_unlock(&memlick_lock);
+	headnode->prev = headnode->next = NULL;
+	return;
+}

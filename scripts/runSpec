@@ -1,0 +1,3 @@
+#!/bin/bash
+
+time /home/haller/cpu2006/bin/specinvoke -d $1 -f speccmds.cmd-new -E -C -q

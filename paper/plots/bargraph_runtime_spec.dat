@@ -1,0 +1,37 @@
+=cluster;1B-M  ;8B-M  ;1B-F  
+=table
+min=0.9
+rotateby=-30
+colors=grey4,grey3,grey2
+font=Times
+fontsz=7
+ylabel=Normalized run time
+yformat=%g
+xscale=0.6
+yscale=0.67
+max=1.5
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2750
+legendy=1400
+
+# Fill in the runtimes below
+# See http://www.burningcutlery.com/derek/bargraph/ for the format of this file and how to tweak it
+# Application	1B-M 8B-M 1B-F
+perlbench	1.1336032389	1.1497975709	1.7368421053
+bzip2	0.9872514023	0.9872514023	0.9867414584
+gcc	1.0126782884	1.0150554675	1.2028526149
+mcf	0.9976958525	0.9688940092	0.9850230415
+gobmk	1.0072992701	1.0188564477	1.0748175182
+hmmer	0.9842866122	0.9886863608	0.997485858
+sjeng	0.9977220957	0.9977220957	1.1395216401
+libquantum	0.9796511628	0.9877906977	1.0063953488
+h264ref	0.9852569503	0.9915754002	0.9945240101
+omnetpp	1.0647857889	1.0585161964	1.0282131661
+astar	0.9755757153	0.9797627355	0.9755757153
+xalancbmk	1.0340030912	1.0540958269	1.0757341577
+
+
+
+
+

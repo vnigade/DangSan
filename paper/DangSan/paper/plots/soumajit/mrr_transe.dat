@@ -1,0 +1,25 @@
+=cluster;TRASE-Raw;TRANSE-EXT-RAW;TRANSE-FILTERED;TRANSE-EXT-FILTERED
+=table
+min=0
+rotateby=0
+#rotateby=30
+colors=grey6,grey4,grey2,black
+font=Times
+fontsz=7
+ylabel=Mean Reciprocal Rank (MRR)
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=0.6
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=2000
+#legendy=1000
+legendy=1400
+
+# Fill in the runtimes below
+# See http://www.burningcutlery.com/derek/bargraph/ for the format of this file and how to tweak it
+# Application Locking Enabled; Locking Disabled	
+FB15k		0.22	0.23 	0.37	0.39
+LUBM1		0.11	0.13	0.18	0.22
+YAGO2		0.09	0.10 	0.13	0.14

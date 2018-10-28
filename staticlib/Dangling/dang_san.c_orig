@@ -1,0 +1,245 @@
+/*
+ * dang_san.c
+ * Design is based on per-Thread log model.
+ */
+#include "metadata.h"
+#include "dang_san.h"
+#include "dsan_atomics.h"
+#include "dsan_common.h"
+#include <setjmp.h>
+#include <signal.h>
+
+#define N_LOOKBEHIND    2 
+
+static unsigned long threadglobal_id = 0;
+static __thread unsigned long threadlocal_id = 0;       /* TODO: Check attribute initial-exec */
+
+/* 
+ * Shamelessly using per-thread
+ * exception handling code snippet by : Drew Eckhardt
+ */
+struct thread_siginfo {
+    jmp_buf jmp;
+    unsigned int initialized : 1;
+};
+
+static __thread struct thread_siginfo thread_state;
+struct sigaction sa_old;
+
+static void
+dang_segv_handler(int sig, siginfo_t *info, void *where)
+{
+    sigset_t set;
+ 
+    sigemptyset(&set);
+    sigaddset(&set, SIGSEGV);
+    /* sigproc_mask for single-threaded programs */
+    pthread_sigmask(SIG_UNBLOCK, &set, NULL);
+ 
+    if (thread_state.initialized) {
+        LOG_MSG("SIGSEGV during dang_freeptr\n");
+        longjmp(thread_state.jmp, 1);
+    } else {
+        /* old handler may be SIG_DFL which precludes a direct
+         * call
+         */
+        sigaction(SIGSEGV, &sa_old, NULL);
+        raise(SIGSEGV);
+    }
+}
+ 
+static inline
+dang_objlog_t *dang_alloc_threadlog(dang_objlog_t *prev_log, unsigned long thread_id)
+{
+    dang_objlog_t       *obj_loglocal;
+
+    /* Allocate log buffer and append it.
+     * TODO: FIXME prepend it. Update metadata atomically. i.e. metaset_8() should be
+     * atomic. Also, we do not have size information.
+     */
+    //obj_loglocal = (dang_objlog_t *)DANG_MALLOC(OBJLOG_SIZE);
+    DANG_MALLOC(obj_loglocal, dang_objlog_t *, OBJLOG_SIZE);
+    obj_loglocal->thread_id = thread_id;
+    obj_loglocal->next_log = NULL;
+    obj_loglocal->index = OBJLOG_START_IDX;
+    obj_loglocal->size = OBJLOG_MAX_PTRS;
+    
+    obj_loglocal->next_log = (dang_objlog_t *)dsan_atomic_cmpxchng((unsigned long*)&prev_log->next_log, 
+                                                                    (unsigned long)obj_loglocal);
+    return obj_loglocal;
+}
+
+static void
+dang_register(unsigned long ptr_addr, dang_objlog_t *obj_log)
+{
+    dang_objlog_t       *obj_loglocal, *obj_logprev = NULL;
+    dang_objlog_t       *obj_logtemp = obj_log;
+
+    /* Retrieve thread ID. Initialize thread ID, if not initialized */
+    if (!threadlocal_id) {
+        /* Give thread ID atomically */
+        threadlocal_id = dsan_atomic_add(&threadglobal_id, 1);
+    }
+    LOG_MSG2("%s thread %lx entered \n", __func__, threadlocal_id);
+    
+    while (obj_logtemp && obj_logtemp->thread_id != threadlocal_id) { /* TODO: Thread Init can be made efficient */
+        obj_logprev = obj_logtemp;
+        obj_logtemp = obj_logtemp->next_log;
+    }
+    
+    if (obj_logtemp == NULL) {
+        obj_loglocal = dang_alloc_threadlog(obj_logprev, threadlocal_id);
+        LOG_MSG3("%s:%lx log buffer allocated %p\n", __func__, threadlocal_id, obj_loglocal);
+    } else {
+        obj_loglocal = obj_logtemp;
+        LOG_MSG3("%s:%lx found log bufer %p\n", __func__, threadlocal_id, obj_loglocal);
+    }
+
+    /*
+     * If log buffer entries are full, then realloc or increase. 
+     * One temporary poor coding is invalidate log's thread ID
+     * allocate new log at the end. TODO: FIXME design
+     */
+    if (obj_loglocal->index == obj_loglocal->size) {       /* Log buffer full */
+        /* FIXME: Handle me */
+        //assert("Log buffer full" && 0);
+        /* Temporary fix */
+        if (!obj_logprev) {
+            obj_logprev = obj_loglocal;
+            obj_logprev->thread_id = 0;
+            if (obj_logprev->next_log) {
+                assert("DAngling list !!" && 0);
+            }
+            obj_loglocal = dang_alloc_threadlog(obj_logprev, threadlocal_id);
+        } else {
+            /* XXX: Highly unsyrnchornized an buggy code. But did it for
+             * SPEC2006.
+             */
+            obj_loglocal->size = obj_loglocal->size + OBJLOG_MAX_PTRS;
+        }
+    }
+
+    //unsigned long *log_buffer = (unsigned long *)((unsigned long)obj_loglocal + sizeof(dang_objlog_t));
+    unsigned long *log_buffer = (unsigned long *)obj_loglocal;
+    //unsigned long index = obj_loglocal->index;
+    for (unsigned long i = 1; i <= N_LOOKBEHIND; ++i) {
+        if (log_buffer[obj_loglocal->index - i] == ptr_addr) {
+            LOG_MSG2("%s:%lx duplicate ptr encountered", __func__, threadlocal_id);
+            return;
+        }
+    }
+ 
+    log_buffer[obj_loglocal->index++] = ptr_addr;
+    LOG_MSG3("%s:%lx pointer stored in buffer %lx\n", __func__, threadlocal_id, ptr_addr); 
+    return;
+}
+
+/*
+ * Inline function which will first check the obj_addr * validity. 
+ * Globals will have 0 metadata. TODO: * stack variables currently are not tracked. 
+ * Thus, their metadata will be 0. We are not checking the validity of the ptr_addr.
+ */
+void
+inlinedang_registerptr(unsigned long ptr_addr, unsigned long obj_addr)
+{
+    LOG_MSG3("%s tracking pointer %lx and object %lx\n", __func__, ptr_addr, obj_addr);
+    if (obj_addr == 0 || obj_addr & DANG_NULL) {
+        LOG_MSG1("%s object is 0 or freed already \n", __func__);
+        return;
+    }
+
+    meta8       obj_metadata = metaget_8(obj_addr);
+    if (!obj_metadata) {
+        LOG_MSG2("%s obj_addr %lx metadata is 0\n", __func__, obj_addr);
+        return;
+    }
+
+#ifndef TRACK_ALL_PTRS
+    meta8       ptr_metadata = metaget_8(ptr_addr);
+    if (!ptr_metadata) {
+        return;
+    }
+#endif
+
+    dang_register(ptr_addr, (dang_objlog_t *)obj_metadata);
+    return;
+}
+
+void
+dang_freeptr(unsigned long obj_addr, unsigned long size)
+{
+
+#ifdef TC_ALLOC
+    if (free_flag) {
+        free_flag = false;
+        return;
+    }
+#endif
+
+    dang_objlog_t *obj_loglocal = (dang_objlog_t *)metaget_8(obj_addr);
+    dang_objlog_t *obj_logtemp; 
+    unsigned long *log_buffer;
+    unsigned long obj_end = obj_addr + size;
+    struct sigaction sa_new;
+   
+    sa_new.sa_sigaction = dang_segv_handler;
+    sa_new.sa_flags = SA_SIGINFO;
+    sigaction(SIGSEGV, &sa_new, &sa_old);
+ 
+    thread_state.initialized = 1;
+    while (obj_loglocal) {
+        log_buffer = (unsigned long *)obj_loglocal;
+        for (unsigned long i = OBJLOG_START_IDX; i < obj_loglocal->index; ++i) {
+            unsigned long *ptr = (unsigned long *)log_buffer[i];
+            if (!setjmp(thread_state.jmp)) {
+                unsigned long ptr_value = *ptr;
+                if (ptr_value >= obj_addr && ptr_value < obj_end) {  /* Optimize this check */
+                    /* TODO : NEED to use CAS. Also, SIGSEGV for the pointer access */
+                    //*ptr = *ptr | DANG_NULL;
+                    dsan_atomic_cmpxchng_once(ptr, ptr_value, ptr_value | DANG_NULL);
+                }
+            }
+        }
+        obj_logtemp = obj_loglocal;
+        obj_loglocal = obj_loglocal->next_log;
+        DANG_FREE(obj_logtemp);
+    }
+    thread_state.initialized = 0;
+    sigaction(SIGSEGV, &sa_old, NULL);
+
+    /* TODO: Efficient zero out */
+    return;
+}
+
+void
+dang_init_heapobj(unsigned long obj_addr, unsigned long size)
+{
+
+#ifdef TC_ALLOC
+    /* DSAN uses TCmalloc to allocate internal log buffers.
+     * Avoid recursion tracking for internal allocations.
+     * TODO: This can be done in TCmalloc which will save one internal
+     * function call
+     */
+    if (malloc_flag) {
+        malloc_flag = false; 
+        return;
+    }
+#endif
+
+    if (!threadlocal_id) {
+        threadlocal_id = dsan_atomic_add(&threadglobal_id, 1);
+    }
+    
+    /* Allocate thread log */
+    dang_objlog_t       *obj_loglocal;
+    //obj_loglocal = (dang_objlog_t *)DANG_MALLOC(OBJLOG_SIZE);
+    DANG_MALLOC(obj_loglocal, dang_objlog_t *, OBJLOG_SIZE);
+    obj_loglocal->thread_id = threadlocal_id;
+    obj_loglocal->next_log = NULL;
+    obj_loglocal->index = OBJLOG_START_IDX;
+    obj_loglocal->size = OBJLOG_MAX_PTRS;
+    /* Set metadata value TODO: TCmalloc hook init's it with zero. Skip it */
+    metaset_8(obj_addr, size, (meta8)obj_loglocal);
+    return;
+}

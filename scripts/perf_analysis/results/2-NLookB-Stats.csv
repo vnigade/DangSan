@@ -1,0 +1,8 @@
+Benchmark, AVG Unique Ptrs, AVG Duplicate Ptrsi, AVG Duplicate Ptrs within Lookbehind
+401.bzip2, 2, 12643, 9822
+403.gcc, 12, 193, 150
+400.perlbench, 15, 65, 35
+464.h264ref, 30, 15, 12
+433.milc, 261994, 5045, 1
+458.sjeng, 0, 0, 0
+445.gobmk, 1, 1, 1

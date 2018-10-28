@@ -1,0 +1,90 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Many common software security hardening solutions need to maintain and look up
+memory metadata at runtime. Examples include bounds information to validate
+array references~\cite{akritidis2008preventing,akritidis2009baggy}, type information to validate cast operations~\cite{lee2015type}, solutions that prevent use-after-free exploits~\cite{lee2015preventing,younan2015freesentry},
+and object pointer information to perform garbage collection~\cite{rafkind2009precise}.
+While newer programming languages can often track
+such metadata in-band using fat pointers, previous efforts to implement
+in-band metadata management in systems programming languages, such as C or C++,
+have found limited applicability due to poor ABI compatibility and nontrivial overhead~\cite{dhurjati2006backwards}.
+
+The alternative solution is to associate metadata information with the memory objects themselves, assuming we have a mechanism to map pointers to the appropriate metadata.
+Such a  primitive is the key to implementing  modern metadata management schemes,
+%% given 
+but it is also challenging because it needs to support all the possible memory objects (heap objects allocated
+with \texttt{malloc()}, globals, and stack objects)
+as well as minimize the performance and memory impact
+of metadata update and lookup operations.
+
+Minimizing the impact of update operations
+is challenging,
+because allocation and deallocation of memory objects and their metadata occurs frequently during execution. 
+%% many memory objects (e.g., stack objects) and their metadata are
+%% frequently allocated/deallocated during the execution.
+Minimizing the impact of lookups is also
+challenging, since metadata lookup must be able to support interior pointers
+into nested classes, structures, and arrays---dictating support for range queries and disqualifying the use of space- and time-efficient hash tables.
+\looseness=-1
+
+Current state-of-the-art software hardening projects all rely on tailored, mostly one-off 
+solutions for metadata
+management, but none of them simultaneously achieves low lookup and update impact in all cases. As a result, none
+of them provides a generic solution. 
+Common approaches include tree-based metadata handling and memory shadowing.
+ 
+Tree-based approaches~\cite{haller2013mempick,lee2015preventing} store
+an interval node for each allocated object according to to its bounds.
+Unfortunately, tree lookups can result in a prohibitive performance hit,
+as the tree depth is frequently in the double digit range (more than 1,024 memory objects).
+The lookup time is also unpredictable, as it varies with the object count.
+As a result,  tree-based systems are unsuitable
+for most production situations.
+\looseness=-1
+
+Traditional memory shadowing, in turn, relies on a fixed
+pointer-to-metadata mapping~\cite{akritidis2008preventing,akritidis2009baggy,younan2015freesentry},
+The key design choice for this approach is the \emph{metadata compression ratio}.
+The metadata compression ratio represents the number of metadata bytes that need to
+be tracked for each data byte.
+For example, assume we store one byte of metadata for each block of eight bytes.
+In this case the compression ratio is $\frac{1}{8}$. If we have a pointer $p$ and
+an array of metadata starting at address $q$, we can compute a pointer
+to the metadata for object as $\frac{1}{8} p + q$.
+This way, metadata can be located very efficiently.
+However, choosing the appropriate
+compression ratio is difficult, as it enforces a minimum alignment on every memory allocation.
+Small compression ratios result in inflated metadata size and a large tracking overhead,
+while large compression ratios result in significant memory fragmentation.
+In practice, memory management systems typically only guarantee alignment
+up to 8 or 16 bytes. This means that to keep the compression ratio reasonably
+small only a single byte of metadata is supported~\cite{akritidis2008preventing,akritidis2009baggy}.
+Even then, this approach introduces prohibitive initialization time and
+memory overhead for large objects in case multi-byte metadata is needed.
+Finally, recent approaches rely on custom
+allocators to reduce the impact of memory shadowing on the heap, but
+cannot support efficient and comprehensive metadata management
+including more performance-sensitive objects on the stack~\cite{lee2015type}.
+
+In this paper, we propose \projectname{}, a new metadata memory management scheme
+based on an efficient and comprehensive variable memory shadowing strategy. Our
+strategy builds on recent developments in heap~\cite{ghemawat2009tcmalloc} and stack~\cite{kuznetsov2014cpi} organizations
+to implement a variable and uniform pointer-to-shadow mapping
+and significantly reduce the performance and memory impact of metadata management.
+Our results show that \projectname{} is practical and can support efficient
+whole-memory metadata management for several software security hardening solutions.
+
+Summarizing, we make the following contributions:
+
+\begin{itemize}
+%\setlength\itemsep{1.5em}
+\item We propose a new memory metadata management scheme that supports interior pointers
+      and is time- and space- efficient in both lookups and updates across all memory object types.
+
+\item We present a prototype implementation termed \projectname{},
+      which demonstrates that efficient and comprehensive metadata management is feasible and widely applicable in practice.
+
+\item We present an empirical evaluation showing that \projectname{} incurs a run-time performance overhead of just 1.2\% on SPECint2006.
+  
+\end{itemize}

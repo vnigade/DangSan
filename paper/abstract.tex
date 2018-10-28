@@ -1,0 +1,13 @@
+\begin{abstract}
+
+Many systems software security hardening solutions rely on the ability to look up
+metadata for individual memory objects during the execution,
+but state-of-the-art metadata management schemes incur significant lookup-time or allocation-time overheads and are unable to handle different memory objects (i.e., stack, heap, and global)
+in a comprehensive and uniform manner.
+
+We present \projectname{}, a new memory metadata management scheme which
+addresses all the key limitations of existing solutions. Our design relies
+on a compact memory shadowing scheme empowered by an alignment-based object allocation strategy. \projectname{}'s allocation strategy ensures that all the memory objects within a page share the same alignment class and each object is always allocated to use the largest alignment class possible. This strategy provides a fast alignment-based memory-to-metadata mapping, while minimizing metadata size and reducing memory fragmentation. We implemented and evaluated \projectname{} on Linux
+and show that \projectname{} incurs just 1.2\% run-time performance overhead, paving the way for practical software security hardening in real-world deployment scenarios.
+\looseness=-1
+\end{abstract}

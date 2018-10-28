@@ -1,0 +1,32 @@
+\section{Related work}
+\label{sec:related}
+
+Besides the different memory shadowing~\cite{akritidis2008preventing,akritidis2009baggy,younan2015freesentry}
+and tree-based approaches~\cite{haller2013mempick,lee2015preventing} already discussed within this paper (in Sections~\ref{sec:introduction}
+ and~\ref{sec:applications}) there is one system aiming
+to solve the metadata tracking problem in a similar manner using a variable compression ratio. The
+custom memory allocator implemented within the Sanitizer library of LLVM offers a metadata retrieval system,
+which shares characteristics with \projectname{}. The system has been used within CaVer~\cite{lee2015type}
+to track type information for heap objects, but is not described in other contexts.
+
+This memory allocator reserves a specific part of the address-space
+,as a Region, for each size category defined within the system. Regions are then split into slots of equal
+size, with each slot containing a single object. This allows the allocator to associate each slot/object
+with a singular piece of metadata, accessed by identifying the slot index corresponding to any pointer.
+The Region is also easily identified from the pointer, since the organization of the address-space into
+Regions happens at compile-time. This systems shares similarities with \projectname{}, with the primary difference being
+the granularity of the memory blobs associated to a certain allocation size. \projectname{} only requires
+memory pages to be uniform, which is already assured by the general purpose allocator \emph{tcmalloc}. This custom allocator
+on the other hand restricts allocations within a certain Region, whose addresses are predefined at compile-time.
+The result is a significant reduction of the potential for address-space randomization, with the address bits
+of each Region being predictable by the attackers. Furthermore, the current implementation
+also enforces a highly predictable allocation pattern within the Region itself with no ability to release
+memory back to the system. The effort to add these highly desirable features to the current design is
+unclear at this point. These concerns are of course irrelevant when using the allocator within the desired
+context of software testing, but they are key characteristics for a general purpose production allocator.
+
+While the design works efficiently for heap objects, Lee et al.~\cite{lee2015type} argue
+that it is not directly applicable to stack and global memory. Their solution to the problem involves
+integrating a tree-based metadata tracking for these memory types.
+As far as we are aware, \projectname{} is the first design to combine uniformity across memory types with all the advantages
+brought forward by variable compression ratio metadata tracking.

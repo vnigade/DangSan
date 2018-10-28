@@ -1,0 +1,9 @@
+\begin{abstract}
+% What is the problem?
+Many system applications are still developed using unsafe languages like C/C++. Memory corruption due to dangling pointers in these applications can lead to Use-after-Free (Double-Free) vulnerabilities. Many Use-after-Free detection schemes and systems have been proposed in the previous work. These systems either incur high performance overhead or have limited applicability.
+% What we did?
+This paper proposes \projectname{}, a simple and efficient lock-less system to prevent Use-after-Free exploits during runtime. \projectname{} uses LLVM compiler instrumentation pass to insert run-time pointer tracking functions. During run-time, most of the pointers that point to the object are tracked. These pointer values are set to invalid addresses when the object is freed. \projectname{} is based on efficient metadata management framework, \metalloc{}~\cite{istvan2016metalloc}.
+% How we did?
+% what we achieved
+ It has moderate performance overhead. For SPEC2006 benchmarks, it has $43.9\%$ average (geometric mean) run-time overhead when only heap pointers are tracked. For widely used web-servers (\texttt{nginx}, \texttt{httpd} and \texttt{lighttpd}), it has moderate throughput degradation of $12.8\%$ and negligible service latency overhead. Moreover, \projectname{} successfully prevented recently discovered Use-after-Free vulnerabilities in widely used complex software.
+\end{abstract}

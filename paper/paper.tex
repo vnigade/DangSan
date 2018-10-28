@@ -1,0 +1,111 @@
+% Based on OSDI template:
+% https://www.usenix.org/sites/default/files/osdi_submit.tex_.txt
+
+% comment out the following line to move from EuroSec template to OSDI template
+\newcommand{\isworkshoppaper}{X}
+
+\ifdefined\isworkshoppaper
+\newcommand{\paperdocumentclass}{sig-alternate-05-2015}
+\else
+\newcommand{\paperdocumentclass}{article}
+\fi
+
+\documentclass[10pt,twocolumn]{\paperdocumentclass}
+
+% template packages
+\ifdefined\isworkshoppaper
+\else
+\usepackage{times}
+\usepackage{fullpage}
+\fi
+
+% non-template packages
+\usepackage[bookmarks=true,pagebackref=false,pdftex]{hyperref}
+\usepackage{epsfig} % eps figures
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{cite}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{xcolor}
+
+% variables
+\newcommand{\projectname}[0]{METAlloc}
+
+% comment out the following line to disable comments in text
+%\newcommand{\commentsenabled}{X}
+% comment commands
+\ifdefined\commentsenabled
+\newcommand{\EK}[1]{\textbf{\color[rgb]{0,1,0} EK: #1}}
+\newcommand{\IH}[1]{\textbf{\color[rgb]{1,0,0} IH: #1}}
+\newcommand{\CRI}[1]{\textbf{\color[rgb]{0,0,1} CRI: #1}}
+\else
+\newcommand{\EK}[1]{}
+\newcommand{\IH}[1]{}
+\newcommand{\CRI}[1]{}
+\fi
+\newcommand{\lipsum}[1]{{\color[rgb]{0.75,0.75,0.75} Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.}}
+
+
+
+\lstset{language=C++, 
+    frame=lines, 
+    backgroundcolor=\color{white},
+    basicstyle=\scriptsize,
+    %numbers=left,
+    breaklines=true,
+    tabsize=2,
+    captionpos=b,
+    commentstyle=\color{gray}\ttfamily,
+    xleftmargin = 6pt,
+}
+
+\hypersetup{
+unicode,
+% no color links
+colorlinks=true,
+citecolor=black,
+filecolor=black,
+linkcolor=black,
+urlcolor=black
+} 
+
+% hacks
+\newenvironment{code}{\small\verbatim}{\endverbatim\normalsize}
+\newcommand{\note}[1]{\noindent\textbf{\color{red}[#1]}}
+\newcommand{\commentout}[1]{}
+
+\begin{document}
+
+\ifdefined\isworkshoppaper
+\title{\projectname{}: Efficient and Comprehensive Metadata Management for Software Security Hardening}
+\else
+\title{\bf \projectname{}: title goes here} % TODO put title here
+\fi
+
+\ifdefined\isworkshoppaper
+\author{
+	Istvan Haller \\ Vrije Universiteit Amsterdam \\ \texttt{i.haller@student.vu.nl} \and 
+	Erik van der Kouwe \\ Vrije Universiteit Amsterdam \\ \texttt{vdkouwe@cs.vu.nl} \and 
+	Cristiano Giuffrida \\ Vrije Universiteit Amsterdam \\ \texttt{giuffrida@cs.vu.nl} \and 
+	Herbert Bos \\ Vrije Universiteit Amsterdam \\ \texttt{herbertb@cs.vu.nl}}
+\else
+\author{Paper \# XXX} % TODO put paper number here, no author names as submission is double-blind
+\fi
+
+\date{}
+\maketitle
+\thispagestyle{empty}
+
+\input{abstract}
+\input{introduction}
+\input{metalloc}
+\input{applications}
+\input{evaluation}
+\input{related}
+\input{conclusion}
+
+\bibliographystyle{abbrv}
+\bibliography{refs}
+
+\end{document}

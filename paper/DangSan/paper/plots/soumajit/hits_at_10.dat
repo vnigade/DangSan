@@ -1,0 +1,25 @@
+=cluster;TRANSE;TRANSE-SG;HOLE;HOLE-SG
+=table
+=nolegoutline
+=nogridy
+min=0
+rotateby=0
+#rotateby=30
+colors=grey7,grey2,grey5,black
+font=Times
+fontsz=7
+ylabel=Hits @ 10
+yformat=%g
+xscale=0.6
+yscale=0.8
+max=80
+extraops=set ylabel offset 3,0
+extraops=set tic scale 0
+legendx=3500
+#legendy=1000
+legendy=1400
+
+#Data below
+FB15k   62.72   63.88   64.44   65.45	
+LUBM1   31.67   38.05   18.56   24.02
+YAGO2	21.97   28.45   22.48   25.83  
