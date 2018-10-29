@@ -6,4 +6,4 @@ Dangling pointers are a common source of vulnerabilities in widely used C/C++ ap
 
 Checkout our latest source code at https://github.com/vusec/dangsan/ 
 
-For more information, see the paper "DangSan: Scalable Use-after-free Detection" by Erik van der Kouwe, Vinod Nigade, and Cristiano Giuffrida, presented at the EuroSys 2017 conference.
+For more information, see the paper "DangSan: Scalable Use-after-free Detection" by Erik van der Kouwe, *Vinod Nigade*, and Cristiano Giuffrida, presented at the EuroSys 2017 conference.
